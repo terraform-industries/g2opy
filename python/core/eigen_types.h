@@ -89,17 +89,17 @@ namespace {
             // .def("rotation", [](CLS& trans) {
             //         MatrixType matrix = trans.matrix();
             //         RotationMatrixType r = matrix.block(0, 0, CLS::Dim, CLS::Dim);
-            //         return r; 
+            //         return r;
             //     })
             // .def("orientation", [](CLS& trans) {
             //         MatrixType matrix = trans.matrix();
             //         RotationMatrixType r = matrix.block(0, 0, CLS::Dim, CLS::Dim);
-            //         return r; 
+            //         return r;
             //     })
             .def("rotation_matrix", [](CLS& trans) {
                     MatrixType matrix = trans.matrix();
                     RotationMatrixType r = matrix.block(0, 0, CLS::Dim, CLS::Dim);
-                    return r; 
+                    return r;
                 })
             .def_property_readonly("R", [](CLS& trans) {
                     MatrixType matrix = trans.matrix();
@@ -142,7 +142,7 @@ namespace {
                     Eigen::Matrix<_Scalar, CLS::Dim, 1> t = matrix.block(0, CLS::Dim, CLS::Dim, 1);
                     return t;
                 })
-            .def_property_readonly("t", 
+            .def_property_readonly("t",
                 [](CLS& trans) {
                     MatrixType matrix = trans.matrix();
                     Eigen::Matrix<_Scalar, CLS::Dim, 1> t = matrix.block(0, CLS::Dim, CLS::Dim, 1);
@@ -182,10 +182,10 @@ void declareEigenTypes(py::module & m) {
                 return Eigen::Quaterniond::FromTwoVectors(a, b);
             })
 
-        .def("x", (double (Eigen::Quaterniond::*) () const) &Eigen::Quaterniond::x)
-        .def("y", (double (Eigen::Quaterniond::*) () const) &Eigen::Quaterniond::y)
-        .def("z", (double (Eigen::Quaterniond::*) () const) &Eigen::Quaterniond::z)
-        .def("w", (double (Eigen::Quaterniond::*) () const) &Eigen::Quaterniond::w)
+        .def("x", [](const Eigen::Quaterniond& q) { return q.x(); })
+        .def("y", [](const Eigen::Quaterniond& q) { return q.y(); })
+        .def("z", [](const Eigen::Quaterniond& q) { return q.z(); })
+        .def("w", [](const Eigen::Quaterniond& q) { return q.w(); })
 
         .def("vec", (const Eigen::VectorBlock<const Eigen::Quaterniond::Coefficients,3> (Eigen::Quaterniond::*) () const) &Eigen::Quaterniond::vec)
 
@@ -233,7 +233,7 @@ void declareEigenTypes(py::module & m) {
 		.def(py::self * py::self)
 		.def(py::self *= py::self)
 		.def(py::self * Eigen::Matrix<double, 2, 1>())
-		//.def("from_rotation_matrix", (Eigen::Rotation2Dd& (Eigen::Rotation2Dd::*) (const Eigen::Matrix<double, 2, 2>&)) 
+		//.def("from_rotation_matrix", (Eigen::Rotation2Dd& (Eigen::Rotation2Dd::*) (const Eigen::Matrix<double, 2, 2>&))
 		//		&Eigen::Rotation2Dd::fromRotationMatrix)
 		.def("from_rotation_matrix", [](Eigen::Rotation2Dd& r, const Eigen::Matrix<double, 2, 2>& R) {
 				r.fromRotationMatrix(R);

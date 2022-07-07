@@ -33,21 +33,21 @@ void declareHyperGraph(py::module & m) {
             //.def(py::init<>())   // invalid new-expression of abstract class
             .def("element_type", &HyperGraph::Data::elementType)                                       // virtual, -> HyperGraphElementType
             .def("next", (HyperGraph::Data* (HyperGraph::Data::*) ()) &HyperGraph::Data::next,
-                    py::return_value_policy::reference)                                                   
+                    py::return_value_policy::reference)
             .def("set_next", &HyperGraph::Data::setNext,
 					"next"_a,
 					py::keep_alive<1, 2>())                                                                                   // -> void
-            .def("data_container", (HyperGraph::DataContainer* (HyperGraph::Data::*) ()) 
+            .def("data_container", (HyperGraph::DataContainer* (HyperGraph::Data::*) ())
                     &HyperGraph::Data::dataContainer,
                     py::return_value_policy::reference)
             .def("set_data_container", &HyperGraph::Data::setDataContainer,
 					"data_container"_a,
 					py::keep_alive<1, 2>())                                                                        // -> void
         ;
-            
+
         py::class_<HyperGraph::DataContainer>(cls, "DataContainer")
             .def(py::init<>())
-            .def("user_data", (HyperGraph::Data* (HyperGraph::DataContainer::*) ()) 
+            .def("user_data", (HyperGraph::Data* (HyperGraph::DataContainer::*) ())
                     &HyperGraph::DataContainer::userData,
                     py::return_value_policy::reference)
             .def("set_user_data", &HyperGraph::DataContainer::setUserData,
@@ -68,7 +68,7 @@ void declareHyperGraph(py::module & m) {
 
         py::class_<HyperGraph::Vertex, HyperGraph::HyperGraphElement>(cls, "Vertex")
             .def(py::init<int>(),
-                    "id"_a=HyperGraph::UnassignedId)
+                    "id"_a = static_cast<decltype(HyperGraph::UnassignedId)>(HyperGraph::UnassignedId))
             .def("id", &HyperGraph::Vertex::id)                                                                        // -> int
             .def("set_id", &HyperGraph::Vertex::setId,
                     "id"_a)                                                                                // int -> void
@@ -79,14 +79,14 @@ void declareHyperGraph(py::module & m) {
 
         py::class_<HyperGraph::Edge, HyperGraph::HyperGraphElement>(cls, "Edge")
             .def(py::init<int>(),
-                    "id"_a=HyperGraph::InvalidId)
+                    "id"_a = static_cast<decltype(HyperGraph::InvalidId)>(HyperGraph::InvalidId))
             .def("resize", &HyperGraph::Edge::resize,
                     "size"_a)                                                                               // virtual, size_t -> void
             .def("vertices", (HyperGraph::VertexContainer& (HyperGraph::Edge::*) ()) &HyperGraph::Edge::vertices,
-                    py::return_value_policy::reference) 
+                    py::return_value_policy::reference)
             .def("vertex", (HyperGraph::Vertex* (HyperGraph::Edge::*) (size_t)) &HyperGraph::Edge::vertex,
                     "i"_a,
-                    py::return_value_policy::reference) 
+                    py::return_value_policy::reference)
             .def("set_vertex", &HyperGraph::Edge::setVertex,
 					"i"_a, "v"_a,
 					py::keep_alive<1, 2>())                                                                        // (size_t, Vertex*) -> void

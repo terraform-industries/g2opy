@@ -8,6 +8,7 @@
 #include "se3quat.h"
 #include "vertex_se3.h"
 #include "vertex_pointxyz.h"
+#include "aruco.h"
 
 #include "edge_pointxyz.h"
 #include "edge_se3.h"
@@ -40,8 +41,10 @@ G2O_REGISTER_TYPE(EDGE_PROJECT_DEPTH, EdgeSE3PointXYZDepth);
 G2O_REGISTER_TYPE(EDGE_POINTXYZ, EdgePointXYZ);
 
 G2O_REGISTER_TYPE(EDGE_SE3_LOTSOF_XYZ, EdgeSE3LotsOfXYZ);
+G2O_REGISTER_TYPE(VERTEX_ARUCO_MARKER, VertexArucoMarker)
+G2O_REGISTER_TYPE(EDGE_SE3_ARUCO_MARKER, EdgeSE3ArucoMarker)
 
-    
+
 void declareTypesSlam3d(py::module & m) {
 
     declareSalm3dParameter(m);
@@ -53,6 +56,7 @@ void declareTypesSlam3d(py::module & m) {
     declareEdgePointXYZ(m);
     declareEdgeSE3(m);
     declareEdgeSE3PointXYZ(m);
+    declareAruco(m);
 
 
 }

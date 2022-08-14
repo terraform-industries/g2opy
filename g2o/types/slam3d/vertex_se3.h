@@ -43,7 +43,7 @@ namespace g2o {
  * matrices. Hence, no scaling or projection.  To avoid that the rotational
  * part of the Isometry3D gets numerically unstable we compute the nearest
  * orthogonal matrix after a large number of calls to the oplus method.
- * 
+ *
  * The parameterization for the increments constructed is a 6d vector
  * (x,y,z,qx,qy,qz) (note that we leave out the w part of the quaternion.
  */
@@ -128,7 +128,7 @@ namespace g2o {
   class VertexSE3WriteGnuplotAction: public WriteGnuplotAction {
     public:
       VertexSE3WriteGnuplotAction();
-      virtual HyperGraphElementAction* operator()(HyperGraph::HyperGraphElement* element, 
+      virtual HyperGraphElementAction* operator()(HyperGraph::HyperGraphElement* element,
           HyperGraphElementAction::Parameters* params_ );
   };
 

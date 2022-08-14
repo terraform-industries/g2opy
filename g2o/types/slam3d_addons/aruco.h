@@ -1,6 +1,6 @@
 #ifndef G2O_ARUCO_MARKER
 #define G2O_ARUCO_MARKER
-
+#include <unordered_map>
 #include "g2o/core/base_binary_edge.h"
 #include "g2o_types_slam3d_addons_api.h"
 #include "g2o/config.h"
@@ -32,6 +32,90 @@ public:
 
 private:
     double size;
+};
+
+class G2O_TYPES_SLAM3D_ADDONS_API VertexArucoObject : public VertexSE3
+{
+public:
+    VertexArucoObject() : VertexSE3(), obj_points_per_marker({}) {}
+    VertexArucoObject(const std::unordered_map<std::uint32_t, CornerXYZ>& m) : VertexSE3(), obj_points_per_marker(m) {}
+
+    CornerXYZ worldCornersMarker(std::uint32_t marker_id)
+    {
+        const CornerXYZ& obj_points = obj_points_per_marker[marker_id];
+        CornerXYZ world_corners;
+        world_corners.transpose() = _estimate * obj_points.transpose();
+        return world_corners;
+    }
+
+private:
+    std::unordered_map<std::uint32_t, CornerXYZ> obj_points_per_marker;
+};
+
+class G2O_TYPES_SLAM3D_ADDONS_API EdgeSE3ArucoObject : public BaseBinaryEdge<12, CornerXYZ, VertexSE3, VertexArucoObject> {
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+
+    EdgeSE3ArucoObject(): BaseBinaryEdge<12, CornerXYZ, VertexSE3, VertexArucoObject>(), marker_id(9999) {
+        resizeParameters(1);
+        installParameter(params, 0);
+        information().setIdentity();
+    }
+
+    EdgeSE3ArucoObject(std::uint32_t marker_id_): BaseBinaryEdge<12, CornerXYZ, VertexSE3, VertexArucoObject>(), marker_id(marker_id_) {
+        resizeParameters(1);
+        installParameter(params, 0);
+        information().setIdentity();
+    }
+
+    virtual bool read(std::istream& /*is*/) { return true; }
+    virtual bool write(std::ostream& /*os*/) const { return true; }
+
+
+
+    void computeError() {
+        VertexArucoObject* object = static_cast<VertexArucoObject*>(_vertices[1]);
+        auto corners = object->worldCornersMarker(marker_id);
+
+        Eigen::Matrix<double, 3, 4> transposedMeas = _measurement.transpose();
+        Eigen::Map<Eigen::Matrix<double, 12, 1>> m(transposedMeas.data(), transposedMeas.size());
+
+        Eigen::Matrix<double, 12, 1> expected;
+        for (size_t i = 0; i < 4; i++) {
+            Vector3D p = cache->w2i() * corners.row(i).transpose();
+            expected(i * 3 + 0) = p(0)/p(2);
+            expected(i * 3 + 1) = p(1)/p(2);
+            // Set depth to 0 if measurement also has no depth
+            expected(i * 3 + 2) = m(i * 3 + 2) != 0 ? p(2) : 0;
+        }
+
+
+        // error, which is backwards from the normal observed - calculated
+        // NOTE(joris): Why?
+        _error = expected.array() - m.array();
+    }
+
+    virtual void setMeasurement(const CornerXYZ& m) {
+      _measurement = m;
+    }
+
+    virtual bool getMeasurementData(double* d) const{
+      Eigen::Map<CornerXYZ> v(d);
+      v=_measurement;
+      return true;
+    }
+
+    virtual int measurementDimension() const { return 12; }
+private:
+    ParameterCamera* params;
+    CacheCamera* cache;
+    std::uint32_t marker_id;
+    virtual bool resolveCaches() {
+        ParameterVector pv(1);
+        pv[0] = params;
+        resolveCache(cache, (OptimizableGraph::Vertex*)_vertices[0],"CACHE_CAMERA",pv);
+        return cache != 0;
+    }
 };
 
 class G2O_TYPES_SLAM3D_ADDONS_API EdgeSE3ArucoMarker : public BaseBinaryEdge<12, CornerXYZ, VertexSE3, VertexArucoMarker> {

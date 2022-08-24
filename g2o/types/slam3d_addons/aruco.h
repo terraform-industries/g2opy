@@ -106,10 +106,10 @@ public:
     }
 
     virtual int measurementDimension() const { return 12; }
+    std::uint32_t marker_id;
 private:
     ParameterCamera* params;
     CacheCamera* cache;
-    std::uint32_t marker_id;
     virtual bool resolveCaches() {
         ParameterVector pv(1);
         pv[0] = params;

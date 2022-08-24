@@ -36,6 +36,7 @@ void declareAruco(py::module & m) {
         .def(py::init<std::uint32_t>(), "marker_id"_a)
         .def("compute_error", &EdgeSE3ArucoObject::computeError)
         .def("set_measurement", &EdgeSE3ArucoObject::setMeasurement)
+        .def_readonly("marker_id", &EdgeSE3ArucoObject::marker_id)
     ;
 }
 

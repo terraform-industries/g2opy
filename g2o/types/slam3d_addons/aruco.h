@@ -34,11 +34,22 @@ private:
     double size;
 };
 
+template <typename Derived>
+void alignZ(const Eigen::MatrixBase<Derived> &R)
+{
+    const auto z = R.col(2);
+    const auto a = acos(z.z());
+    auto c = Eigen::Vector3d(0.0, 0.0, 1.0).cross(z).normalized();
+
+    Eigen::Matrix3d r = Eigen::AngleAxisd(a, c).toRotationMatrix();
+    const_cast<Eigen::MatrixBase<Derived> &>(R) = r.transpose() * R;
+}
+
 class G2O_TYPES_SLAM3D_ADDONS_API VertexArucoObject : public VertexSE3
 {
 public:
     VertexArucoObject() : VertexSE3(), obj_points_per_marker({}) {}
-    VertexArucoObject(const std::unordered_map<std::uint32_t, CornerXYZ>& m) : VertexSE3(), obj_points_per_marker(m) {}
+    VertexArucoObject(const std::unordered_map<std::uint32_t, CornerXYZ>& m, bool only4dof_) : VertexSE3(), obj_points_per_marker(m), only4dof(only4dof_) {}
 
     CornerXYZ worldCornersMarker(std::uint32_t marker_id)
     {
@@ -48,8 +59,14 @@ public:
         return world_corners;
     }
 
+    virtual void oplusImpl(const double* update) {
+        VertexSE3::oplusImpl(update);
+        alignZ(_estimate.matrix().topLeftCorner<3, 3>());
+    }
+
 private:
     std::unordered_map<std::uint32_t, CornerXYZ> obj_points_per_marker;
+    bool only4dof;
 };
 
 class G2O_TYPES_SLAM3D_ADDONS_API EdgeSE3ArucoObject : public BaseBinaryEdge<12, CornerXYZ, VertexSE3, VertexArucoObject> {

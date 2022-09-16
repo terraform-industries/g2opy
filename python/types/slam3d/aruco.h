@@ -19,7 +19,7 @@ void declareAruco(py::module & m) {
     ;
 
     py::class_<VertexArucoObject, BaseVertex<6, Isometry3D>>(m, "VertexArucoObject")
-        .def(py::init<std::unordered_map<std::uint32_t, CornerXYZ>>(), "obj_points"_a)
+        .def(py::init<std::unordered_map<std::uint32_t, CornerXYZ>, bool>(), "obj_points"_a, "only4dof"_a)
         .def("cornerXYZ", &VertexArucoObject::worldCornersMarker)
     ;
 

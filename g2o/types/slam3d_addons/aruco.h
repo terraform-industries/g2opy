@@ -61,7 +61,8 @@ public:
 
     virtual void oplusImpl(const double* update) {
         VertexSE3::oplusImpl(update);
-        alignZ(_estimate.matrix().topLeftCorner<3, 3>());
+        if (only4dof)
+            alignZ(_estimate.matrix().topLeftCorner<3, 3>());
     }
 
 private:

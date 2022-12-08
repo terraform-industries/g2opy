@@ -24,17 +24,16 @@ class CMakeBuildExtension(build_ext):
             raise RuntimeError('Cannot find CMake executable')
 
         for ext in self.extensions:
-            extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
-            if not os.path.exists(self.build_temp):
-                os.makedirs(self.build_temp)
-            print(self.build_temp, ext.cmake_lists_dir)
+            os.makedirs(self.build_temp, exist_ok=True)
+
             subprocess.check_call(['cmake', ext.cmake_lists_dir], cwd=self.build_temp)
-            subprocess.check_call(['make'], cwd=self.build_temp)
+            subprocess.check_call(['make', '-j8'], cwd=self.build_temp)
 
             lib_file = glob.glob(__library_file__)
             assert len(lib_file) == 1
 
-            shutil.copy(lib_file[0], extdir)
+            os.makedirs(os.path.dirname(self.get_ext_fullpath(ext.name)), exist_ok=True)
+            shutil.copy(lib_file[0], self.get_ext_fullpath(ext.name))
 
 setup(
     name='g2opy',
